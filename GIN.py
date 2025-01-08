@@ -1,17 +1,6 @@
-import numpy as np
 import torch
-from torch_geometric.data import Data
-import torch_geometric
-
-from torch_geometric.datasets import TUDataset
-from torch_geometric.loader import DataLoader
-from torch_geometric.data import Data
 from torch import nn
 from torch_geometric.nn import GINConv, global_mean_pool
-from torch_geometric.utils import group_argsort, index_to_mask, unbatch, softmax
-
-
-
 
 class GIN(torch.nn.Module):
     def __init__(self, n_features, hidden_dim):
@@ -27,7 +16,11 @@ class GIN(torch.nn.Module):
         self.conv1 = GINConv(self.MLP1, eps=0)
         self.conv2 = GINConv(self.MLP2, eps=0)
 
-    def forward(self, data,reverse=False, inf=10**10):
+    def forward(self, data,reverse=False):
+        '''
+        data- batch graph data
+        returns avg embedding (x_pool) and node embeddings (x)
+        '''
         if reverse:
             edge_index=data.reversed_edge_index
         else:
@@ -35,7 +28,6 @@ class GIN(torch.nn.Module):
         node_features = data.x
         batch = data.batch
         x = self.conv1(node_features, edge_index)
-        # mask=~mask
         x = self.conv2(x, edge_index)
         x = torch.nn.functional.dropout(x, training=self.training)
 

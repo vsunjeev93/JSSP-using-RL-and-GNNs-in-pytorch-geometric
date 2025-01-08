@@ -21,8 +21,6 @@ class actor(torch.nn.Module):
         self.linear1 = nn.Linear(hidden_dim * 4, hidden_dim)
         self.linear2 = nn.Linear(hidden_dim+n_features, hidden_dim)
         self.action = nn.Linear(hidden_dim, 1)
-        # action_layers = [self.linear1, nn.BatchNorm1d(hidden_dim),nn.ReLU(), self.linear2, nn.ReLU(), self.action]
-        # self.action_MLP = nn.Sequential(*action_layers)
         action_layers1 = [self.linear1, nn.ReLU()]
         self.action_MLP1 = nn.Sequential(*action_layers1)
         action_layers2 = [self.linear2, nn.ReLU(), self.action]
@@ -37,10 +35,10 @@ class actor(torch.nn.Module):
         batch_index = unbatch(batch, batch)
         batch_index = torch.tensor([len(i) for i in batch_index])
         graph_embedding = torch.repeat_interleave(x_pool.to('cpu'), batch_index, dim=0).to('mps')
+        #reversed edge avg node embedding
         graph_embedding_b=torch.repeat_interleave(x_pool_b.to('cpu'), batch_index, dim=0).to('mps')
+        # final embedding before passing to the action layers has a skip connection from input features.
         final_embed = torch.cat((x, graph_embedding,x_b,graph_embedding_b), dim=1)
-        
-        # x = self.action_MLP(final_embed).squeeze()
         x = self.action_MLP1(final_embed)
         x=torch.cat((x,data.x),dim=1)
         x=self.action_MLP2(x).squeeze()
@@ -48,15 +46,8 @@ class actor(torch.nn.Module):
         x = x - mask.squeeze()
         x = softmax(x, index=batch)
         x = torch.stack(unbatch(x, batch))
-        # if t>0.9:
-        #     sample=torch.multinomial(torch.ones(x.size()).to('mps'),num_samples=1).to('mps')
-        # else:
-        #     print(x)
         sample = torch.multinomial(x, num_samples=1).to('mps')
-        # ss(sample.size())
         log_actions=torch.log(torch.gather(x,index=sample,dim=1)).squeeze()
-        # print(sample,x,log_actions,torch.gather(x,index=sample,dim=1))
-        # print(x,'softmax')
         sample = sample.squeeze() + data.graph_id_offset
         
         return sample, log_actions

@@ -105,7 +105,7 @@ def generate_graph_from_data(nj, nm, times, machines):
 
 def data_generator(nj, nm, low, high, instances=10000, batch_size=12):
     graphs = []
-    # np.random.seed(1324)
+    np.random.seed(42)
     for instance in range(instances):
         times, machines = uni_instance_gen(nj, nm, low, high)
         graph = generate_graph_from_data(nj, nm, times, machines)
@@ -115,11 +115,3 @@ def data_generator(nj, nm, low, high, instances=10000, batch_size=12):
 
 
 loader = data_generator(5, 5, 1, 3, 10, 2)
-# for data in loader:
-#     print(
-#         data.op_machine_map,
-#         data.machine_avail_time,
-#         data.machine_last_op,
-#         data.graph_id_offset,
-#         data.num_nodes,
-#     )
