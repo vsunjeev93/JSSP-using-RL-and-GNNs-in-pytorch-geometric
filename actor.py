@@ -21,13 +21,13 @@ class actor(torch.nn.Module):
         self.linear1 = nn.Linear(hidden_dim * 4, hidden_dim)
         self.linear2 = nn.Linear(hidden_dim+n_features, hidden_dim)
         self.action = nn.Linear(hidden_dim, 1)
-        action_layers = [self.linear1, nn.ReLU(), self.linear2, nn.ReLU(), self.action]
-        self.action_MLP = nn.Sequential(*action_layers)
+        # action_layers = [self.linear1, nn.BatchNorm1d(hidden_dim),nn.ReLU(), self.linear2, nn.ReLU(), self.action]
+        # self.action_MLP = nn.Sequential(*action_layers)
         action_layers1 = [self.linear1, nn.ReLU()]
         self.action_MLP1 = nn.Sequential(*action_layers1)
         action_layers2 = [self.linear2, nn.ReLU(), self.action]
         self.action_MLP2 = nn.Sequential(*action_layers2)
-        
+        self.bn1=nn.BatchNorm1d(hidden_dim)
 
     def forward(self, data, inf=10**10):
         batch = data.batch

@@ -120,8 +120,8 @@ nodes_per_graph=param_dict['nj']*param_dict['nm']
 LR=0.0001
 actor_optim=torch.optim.Adam(actor.parameters(),lr=LR)
 critic_optim=torch.optim.Adam(critic.parameters(),lr=LR)
-scheduler_actor=torch.optim.lr_scheduler.StepLR(actor_optim,step_size=10,gamma=0.9)
-scheduler_critic=torch.optim.lr_scheduler.StepLR(critic_optim,step_size=10,gamma=0.9)
+scheduler_actor=torch.optim.lr_scheduler.StepLR(actor_optim,step_size=20,gamma=0.9)
+scheduler_critic=torch.optim.lr_scheduler.StepLR(critic_optim,step_size=20,gamma=0.9)
 epoch=200
 num_iterations=0
 batch_num=00

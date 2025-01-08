@@ -20,7 +20,8 @@ class critic(torch.nn.Module):
         self.linear1=torch.nn.Linear(hidden_dim,hidden_dim)
         self.linear2=torch.nn.Linear(hidden_dim,hidden_dim)
         self.output=torch.nn.Linear(hidden_dim,1)
-
+        # self.bn1=nn.BatchNorm1d(hidden_dim)
+        # self.bn2=nn.BatchNorm1d(hidden_dim)
     def forward(self, data):
         x,_=self.GIN(data)
         # x=torch.cat((x,dß),dim=1)

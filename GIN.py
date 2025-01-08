@@ -20,8 +20,8 @@ class GIN(torch.nn.Module):
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
         self.linear3 = nn.Linear(hidden_dim, hidden_dim)
         self.linear4 = nn.Linear(hidden_dim, hidden_dim)
-        MLP1_layers = [self.linear1, nn.ReLU(), self.linear2, nn.ReLU()]
-        MLP2_layers = [self.linear3, nn.ReLU(), self.linear4, nn.ReLU()]
+        MLP1_layers = [self.linear1,nn.BatchNorm1d(hidden_dim), nn.ReLU(),nn.BatchNorm1d(hidden_dim), self.linear2, nn.ReLU()]
+        MLP2_layers = [self.linear3, nn.BatchNorm1d(hidden_dim), self.linear4, nn.BatchNorm1d(hidden_dim),nn.ReLU()]
         self.MLP1 = nn.Sequential(*MLP1_layers)
         self.MLP2 = nn.Sequential(*MLP2_layers)
         self.conv1 = GINConv(self.MLP1, eps=0)
@@ -35,12 +35,9 @@ class GIN(torch.nn.Module):
         node_features = data.x
         batch = data.batch
         x = self.conv1(node_features, edge_index)
-        x = torch.nn.functional.relu(x)
-        x = torch.nn.functional.dropout(x, training=self.training)
-
         # mask=~mask
         x = self.conv2(x, edge_index)
-        x = torch.nn.functional.relu(x)
+        x = torch.nn.functional.dropout(x, training=self.training)
 
         ### graph node
         x_pool = global_mean_pool(x, batch)
