@@ -1,4 +1,4 @@
-# Scheduling-using-RL-and-GNNs--tutorial
+# Job shop scheduling using RL and GNNs
 A simple GNN based RL algorithm for job shop scheduling leveraging the pytorch geometric framework. This repo is still under development. To do
 
 - more explanation about the problem and code (make it a tutorial)
