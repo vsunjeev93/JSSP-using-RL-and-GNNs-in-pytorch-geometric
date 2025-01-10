@@ -46,7 +46,11 @@ class actor(torch.nn.Module):
         x = x - mask.squeeze()
         x = softmax(x, index=batch)
         x = torch.stack(unbatch(x, batch))
-        sample = torch.multinomial(x, num_samples=1).to('mps')
+        if self.training:
+            sample = torch.multinomial(x, num_samples=1).to('mps')
+        else:
+            _,sample=torch.max(x,dim=1)
+            sample=sample.unsqueeze(-1)
         log_actions=torch.log(torch.gather(x,index=sample,dim=1)).squeeze()
         sample = sample.squeeze() + data.graph_id_offset
         
