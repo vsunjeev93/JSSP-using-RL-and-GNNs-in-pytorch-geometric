@@ -1,11 +1,9 @@
 import torch
 import torch_geometric.transforms as transform
-def next_state(
-    data,
-    actions,
-    param_dict
-):
-    '''
+
+
+def next_state(data, actions, param_dict):
+    """
     machine_last_op- last operation undertaken in a machine -size (batch_num_machines,)
     op_machine- machine used in each operation- size (batch_num_nodes,)
     m_avail_time- machine availability -size (batch_num_machines,)
@@ -14,23 +12,23 @@ def next_state(
     batch_index_start - for book keeping stores the starting index of each graph size(number of graphs in batch,)
     mask- size(batch_num_nodes,)
     returns data (graph)
-    '''
+    """
 
-    machine_last_op=data.machine_last_op
-    op_machine=data.op_machine_map
-    m_avail_time=data.machine_avail_time
-    batch_index_start=data.graph_id_offset
-    processing_times=data.processing_times
-    op_end_time=data.op_end_time
-    mask=data.mask
-    remaining_processing_time=data.remaining_processing_time
-    nm=param_dict['nm']
-    nj=param_dict['nj']
-    
+    machine_last_op = data.machine_last_op
+    op_machine = data.op_machine_map
+    m_avail_time = data.machine_avail_time
+    batch_index_start = data.graph_id_offset
+    processing_times = data.processing_times
+    op_end_time = data.op_end_time
+    mask = data.mask
+    remaining_processing_time = data.remaining_processing_time
+    nm = param_dict["nm"]
+    nj = param_dict["nj"]
+
     # get last operation done on machines used for actions and add the edges
     last_op = machine_last_op[op_machine[actions]]
-    non_zero_edges=torch.nonzero(last_op).squeeze(-1)
-    if non_zero_edges.numel()!=0:
+    non_zero_edges = torch.nonzero(last_op).squeeze(-1)
+    if non_zero_edges.numel() != 0:
         edges_to_add = torch.stack((last_op[non_zero_edges], actions[non_zero_edges]))
         data.edge_index = torch.cat([data.edge_index, edges_to_add], dim=1)
         remove_duplicates = transform.RemoveDuplicatedEdges()
@@ -62,19 +60,19 @@ def next_state(
     next_actions = next_actions[~torch.isnan(next_actions)].int()
     mask[actions.squeeze()] = False
     mask[next_actions.squeeze()] = True
-    candidate_actions=torch.nonzero(mask)
-    previous_candidate_actions=candidate_actions-1
-    previous_candidate_actions=torch.where(
-        (previous_candidate_actions) % (nm*nj+2) == 0, 0, previous_candidate_actions
-    ) 
+    candidate_actions = torch.nonzero(mask)
+    previous_candidate_actions = candidate_actions - 1
+    previous_candidate_actions = torch.where(
+        (previous_candidate_actions) % (nm * nj + 2) == 0, 0, previous_candidate_actions
+    )
     # return the updated tensors
     # est end time update
-    new_est=op_end_time[actions]+remaining_processing_time[actions]
-    stacked=torch.stack((data.est_end_time,new_est),dim=1)
-    data.est_end_time,_=torch.max(stacked,dim=1)
-    data.machine_last_op=machine_last_op
-    data.op_machine_map=op_machine
-    data.mach_avail_time=m_avail_time
-    data.op_end_time=op_end_time
-    data.mask=mask
+    new_est = op_end_time[actions] + remaining_processing_time[actions]
+    stacked = torch.stack((data.est_end_time, new_est), dim=1)
+    data.est_end_time, _ = torch.max(stacked, dim=1)
+    data.machine_last_op = machine_last_op
+    data.op_machine_map = op_machine
+    data.mach_avail_time = m_avail_time
+    data.op_end_time = op_end_time
+    data.mask = mask
     return data

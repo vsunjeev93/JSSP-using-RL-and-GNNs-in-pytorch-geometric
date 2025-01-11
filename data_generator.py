@@ -20,6 +20,7 @@ def uni_instance_gen(nj, nm, low, high):
     machines = permute_rows(machines)
     return times, machines
 
+
 class JSSPData(Data):
     def __inc__(self, key, value, *args, **kwargs):
         if "index" in key:
@@ -41,8 +42,8 @@ def __cat_dim__(self, key, value, *args, **kwargs):
         "op_end_time",
         "graph_id_offset",
         "machine_avail_time",
-        'mask',
-        'est_end_time'
+        "mask",
+        "est_end_time",
     ]:
         return 1
     else:
@@ -57,33 +58,38 @@ def generate_graph_from_data(nj, nm, times, machines):
     op_machine = [-1] * (nm * nj + 2)
     processing_times = [0] * (nm * nj + 2)
     candidate_actions = []
-    remaining_processing_time=[0]*(nm*nj+2)
-    est_end_time=np.max(np.cumsum(times,axis=1))
-    reverse_edges=[]
+    remaining_processing_time = [0] * (nm * nj + 2)
+    est_end_time = np.max(np.cumsum(times, axis=1))
+    reverse_edges = []
     for i in range(nj):
         edges.append(torch.tensor([0, nodes]))
-        reverse_edges.append(torch.tensor([nodes,0]))
+        reverse_edges.append(torch.tensor([nodes, 0]))
         candidate_actions.append(nodes)
         for j in range(nm):
             machine_vector = [0] * nm
             machine_vector[machines[i, j]] = 1
             op_machine[nodes] = int(machines[i, j])
             processing_times[nodes] = times[i, j]
-            if j!=nm-1:
-                remaining_processing_time[nodes]=np.sum(times[i,j+1:])
-            features.append(torch.tensor([times[i, j],remaining_processing_time[nodes],nm-j-1] + machine_vector))
+            if j != nm - 1:
+                remaining_processing_time[nodes] = np.sum(times[i, j + 1 :])
+            features.append(
+                torch.tensor(
+                    [times[i, j], remaining_processing_time[nodes], nm - j - 1]
+                    + machine_vector
+                )
+            )
             if (nodes) % nm != 0:
                 edges.append(torch.tensor([nodes, nodes + 1]))
-                reverse_edges.append(torch.tensor([nodes+1, nodes]))
+                reverse_edges.append(torch.tensor([nodes + 1, nodes]))
             else:
                 edges.append(torch.tensor([nodes, nj * nm + 1]))
-                reverse_edges.append(torch.tensor([nj*nm+1, nodes]))
+                reverse_edges.append(torch.tensor([nj * nm + 1, nodes]))
             nodes += 1
     features.append(torch.tensor([0] * (nm + 3)))
-    nodes+=1
-    mask= index_to_mask(torch.tensor(candidate_actions), size=nodes)
+    nodes += 1
+    mask = index_to_mask(torch.tensor(candidate_actions), size=nodes)
     edge_index = torch.stack(edges)
-    reverse_edge_index=torch.stack(reverse_edges)
+    reverse_edge_index = torch.stack(reverse_edges)
     features = torch.stack(features)
     graph = JSSPData(
         x=features,
@@ -98,7 +104,7 @@ def generate_graph_from_data(nj, nm, times, machines):
         graph_id_offset=torch.tensor([0]),
         mask=mask,
         remaining_processing_time=torch.tensor(remaining_processing_time).float(),
-        est_end_time=torch.tensor(est_end_time).float()
+        est_end_time=torch.tensor(est_end_time).float(),
     )
     return graph
 
