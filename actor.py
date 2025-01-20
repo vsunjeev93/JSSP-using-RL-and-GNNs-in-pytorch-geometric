@@ -33,15 +33,11 @@ class actor(torch.nn.Module):
         x_pool_b, x_b = self.GIN2(data, reverse=True)
         batch_index = unbatch(batch, batch)
         batch_index = torch.tensor([len(i) for i in batch_index])
-        if 'mps' not in str(x_pool.device):
-            graph_embedding = torch.repeat_interleave(
-                x_pool, batch_index, dim=0
-                )
+        if "mps" not in str(x_pool.device):
+            graph_embedding = torch.repeat_interleave(x_pool, batch_index, dim=0)
             # reversed edge avg node embedding
-            graph_embedding_b = torch.repeat_interleave(
-                x_pool_b, batch_index, dim=0
-            )
-        else: # operations below are not supported on mps currently
+            graph_embedding_b = torch.repeat_interleave(x_pool_b, batch_index, dim=0)
+        else:  # operations below are not supported on mps currently
             graph_embedding = torch.repeat_interleave(
                 x_pool.to("cpu"), batch_index, dim=0
             ).to("mps")
@@ -56,10 +52,12 @@ class actor(torch.nn.Module):
         x = self.action_MLP2(x).squeeze()
         mask = torch.where(mask, 0, inf)
         x = x - mask.squeeze()
-        if 'mps' not in str(x.device): # operations below are not supported on mps currently
+        if "mps" not in str(
+            x.device
+        ):  # operations below are not supported on mps currently
             x = softmax(x, index=batch)
         else:
-            x = softmax(x.to('cpu'), index=batch.to('cpu')).to('mps')
+            x = softmax(x.to("cpu"), index=batch.to("cpu")).to("mps")
         x = torch.stack(unbatch(x, batch))
         if self.training:
             sample = torch.multinomial(x, num_samples=1).to(x.device)

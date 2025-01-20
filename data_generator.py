@@ -109,7 +109,7 @@ def generate_graph_from_data(nj, nm, times, machines):
     return graph
 
 
-def data_generator(nj, nm, low, high, instances=10000, batch_size=12,seed=42):
+def data_generator(nj, nm, low, high, instances=10000, batch_size=12, seed=42):
     graphs = []
     np.random.seed(seed)
     for instance in range(instances):

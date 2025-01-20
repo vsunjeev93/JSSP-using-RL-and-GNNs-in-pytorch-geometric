@@ -7,18 +7,22 @@ from state_transition import next_state
 import argparse
 
 # initializing the job parameters
-parser=argparse.ArgumentParser('specify the number of jobs and machines')
-parser.add_argument('--nj',type=int,default=10)
-parser.add_argument('--nm',type=int,default=10)
-parser.add_argument('--seed',type=int,default=42)
+parser=argparse.ArgumentParser('training an RL agent to solve JSSP')
+parser.add_argument('--nj',type=int,default=10,help='number of jobs')
+parser.add_argument('--nm',type=int,default=10,help='number of machines')
+parser.add_argument('--seed',type=int,default=42,help='seed for reproducibility')
+parser.add_argument('--low',type=int,default=1,help='lower bound of processing times')
+parser.add_argument('--high',type=int,default=99,help='upper bound of processing times')
+parser.add_argument('--instances',type=int,default=300,help='number of instances to train on in each epoch')
+parser.add_argument('--batch_size',type=int,default=10,help='batch size for training')
 args=parser.parse_args()
 param_dict = {
     "nj": args.nj,
     "nm": args.nm,
-    "low": 1,
-    "high": 99,
-    "instances": 300,
-    "batch_size": 10,
+    "low": args.low,
+    "high": args.high,
+    "instances": args.instances,
+    "batch_size": args.batch_size,
 }
 # setting device and creating instances of actor and critic function approximators
 if torch.cuda.is_available():
