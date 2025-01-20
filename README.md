@@ -1,7 +1,3 @@
-# Job shop scheduling using RL and GNNs
-A  GNN based RL algorithm for job shop scheduling leveraging the pytorch geometric framework.\
-
-
 # Reinforcement Learning for Job Shop Scheduling Problem
 
 This repository implements a reinforcement learning solution for the Job Shop Scheduling Problem (JSSP) using Graph Neural Networks (GNNs). The implementation uses PyTorch and PyTorch Geometric for graph-based deep learning.
