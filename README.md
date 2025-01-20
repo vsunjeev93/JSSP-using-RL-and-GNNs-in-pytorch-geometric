@@ -72,7 +72,7 @@ python train_JSSP.py --nj 10 --nm 10 --instances 300 --batch_size 10
 python test.py --nj 10 --nm 10 --instances 100 --batch_size 1
 ```
 #### test results
-6x6- 574.14
+6x6- 574.14\
 10x10- 1059.79
 
 ### Parameters
