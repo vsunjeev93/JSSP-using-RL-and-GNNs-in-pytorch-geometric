@@ -4,24 +4,35 @@ from critic import critic
 import torch
 import torch_geometric.transforms as transform
 from state_transition import next_state
+import argparse
 
 # initializing the job parameters
+parser=argparse.ArgumentParser('specify the number of jobs and machines')
+parser.add_argument('--nj',type=int,default=10)
+parser.add_argument('--nm',type=int,default=10)
+parser.add_argument('--seed',type=int,default=42)
+args=parser.parse_args()
 param_dict = {
-    "nj": 10,
-    "nm": 10,
+    "nj": args.nj,
+    "nm": args.nm,
     "low": 1,
     "high": 99,
     "instances": 300,
     "batch_size": 10,
 }
 # setting device and creating instances of actor and critic function approximators
-device = torch.device("mps")
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = torch.device("cpu")
 input_features = param_dict["nm"] + 3
 actor = actor(input_features, 512)
 actor.to(device)
 critic = critic(input_features, 512)
 critic.to(device)
-torch.manual_seed(42)
+torch.manual_seed(args.seed)
 # setting optimizer, learning rate and other training parameters
 LR = 0.0001
 actor_optim = torch.optim.Adam(actor.parameters(), lr=LR)
@@ -57,7 +68,7 @@ def train_episode(rewards, value_functions, log_actions):
 
 # training starts here
 for e in range(epoch):
-    loader = data_generator(*param_dict.values())
+    loader = data_generator(*param_dict.values(),seed=args.seed)
     for data in loader:
         data = data.to(device)
         total_reward = 0
