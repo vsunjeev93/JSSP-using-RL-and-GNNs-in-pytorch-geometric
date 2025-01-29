@@ -36,6 +36,8 @@ actor = actor(input_features, 512)
 actor.to(device)
 critic = critic(input_features, 512)
 critic.to(device)
+actor.train()
+critic.train()
 torch.manual_seed(args.seed)
 # setting optimizer, learning rate and other training parameters
 LR = 0.0001
